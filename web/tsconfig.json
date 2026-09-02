@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@core/*": ["../src/core/*"]
+    }
+  },
+  "include": ["src", "../src/core/types.ts"]
+}

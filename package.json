@@ -1,0 +1,39 @@
+{
+  "name": "arabian",
+  "version": "0.1.0",
+  "description": "Local-first engineering lineage: capture why your codebase looks the way it does.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "arabian": "./dist/cli/index.js",
+    "arabian-mcp": "./dist/mcp/server.js"
+  },
+  "files": [
+    "dist",
+    "web/dist",
+    "skills"
+  ],
+  "scripts": {
+    "build": "tsup && npm run build -w web",
+    "build:core": "rm -rf dist && tsup",
+    "build:web": "npm run build -w web",
+    "dev:web": "npm run dev -w web",
+    "typecheck": "tsc --noEmit",
+    "seed": "node scripts/seed.mjs"
+  },
+  "workspaces": [
+    "web"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.0"
+  }
+}

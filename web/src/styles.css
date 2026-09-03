@@ -1,0 +1,95 @@
+/* HeroUI v3 ships Tailwind v4 + precompiled component/theme layers */
+@import "@heroui/styles";
+
+@import "@xyflow/react/dist/style.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Slightly larger base scale for the whole app */
+html {
+  font-size: 17px;
+}
+
+/* ---- Orb the mascot ---- */
+
+@keyframes orb-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95.5% { transform: scaleY(0.06); }
+}
+.orb-eyes {
+  animation: orb-blink 4.6s ease-in-out infinite;
+  transform-origin: 50px 52px;
+}
+@keyframes orb-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.orb-float { animation: orb-float 6s ease-in-out infinite; }
+
+/* ---- Markdown rendering (theme-aware via HeroUI tokens) ---- */
+
+.markdown { line-height: 1.7; font-size: 0.95rem; color: var(--foreground); }
+.markdown > * + * { margin-top: 0.8em; }
+.markdown h1, .markdown h2, .markdown h3, .markdown h4 {
+  color: var(--foreground); font-weight: 600; margin-top: 1.3em; line-height: 1.3;
+}
+.markdown h1 { font-size: 1.3rem; }
+.markdown h2 { font-size: 1.15rem; }
+.markdown h3 { font-size: 1.02rem; }
+.markdown a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+.markdown ul, .markdown ol { padding-left: 1.4em; }
+.markdown ul { list-style: disc; }
+.markdown ol { list-style: decimal; }
+.markdown li + li { margin-top: 0.25em; }
+.markdown code {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+  font-family: ui-monospace, monospace;
+  color: var(--accent);
+}
+.markdown pre {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9em 1.1em;
+  overflow-x: auto;
+}
+.markdown pre code { background: none; border: none; padding: 0; }
+.markdown blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1em;
+  color: var(--muted);
+  font-style: italic;
+}
+.markdown table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+.markdown th, .markdown td { border: 1px solid var(--border); padding: 0.4em 0.65em; text-align: left; }
+.markdown th { background: var(--surface-secondary); }
+.markdown hr { border-color: var(--border); }
+
+/* ---- React Flow dark/light theme via HeroUI tokens ---- */
+
+.react-flow { background: transparent; }
+.react-flow__controls {
+  border-radius: 12px; overflow: hidden; box-shadow: var(--surface-shadow, 0 4px 24px rgb(0 0 0 / 0.4));
+}
+.react-flow__controls-button {
+  background: var(--surface); border-bottom: 1px solid var(--border); fill: var(--muted);
+  width: 28px; height: 28px;
+}
+.react-flow__controls-button:hover { background: var(--surface-secondary); fill: var(--foreground); }
+.react-flow__attribution {
+  background: transparent; color: var(--muted); font-size: 9px;
+}
+.react-flow__attribution a { color: var(--muted); }
+.react-flow__handle { opacity: 0; pointer-events: none; }
+.react-flow__edge-path { transition: opacity 0.2s, stroke-width 0.15s; }
+.react-flow__node { transition: opacity 0.2s; cursor: pointer; }
+
+/* react-aria popovers render in a top layer; keep HeroUI popover styling */
+[data-overlay-container] { isolation: isolate; }
+
+/* scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }

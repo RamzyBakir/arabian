@@ -157,6 +157,20 @@ async function handleApi(
     return void jsonRes(res, 200, store.getGraph());
   }
 
+  // GET /api/mcp-config — ready-to-paste MCP configs with the real server path
+  if (method === "GET" && path === "/api/mcp-config") {
+    const serverPath = fileURLToPath(new URL("../mcp/server.js", import.meta.url));
+    return void jsonRes(res, 200, {
+      serverPath,
+      json: JSON.stringify(
+        { mcpServers: { arabian: { command: "node", args: [serverPath] } } },
+        null,
+        2,
+      ),
+      toml: `[mcp_servers.arabian]\ncommand = "node"\nargs = ["${serverPath}"]\n`,
+    });
+  }
+
   // GET /api/search?q=
   if (method === "GET" && path === "/api/search") {
     const q = url.searchParams.get("q") ?? "";

@@ -32,21 +32,23 @@ interface VariantSection {
   note?: string;
 }
 
-const VARIANTS: VariantSection[] = [
-  {
-    id: "json",
-    label: "JSON — Claude Desktop, Cursor, ZCode / Claude Code",
-    file: "claude_desktop_config.json · ~/.cursor/mcp.json · .mcp.json (project root)",
-    code: json(),
-    note: "Windows Claude Desktop: %APPDATA%\\Claude\\claude_desktop_config.json",
-  },
-  {
-    id: "toml",
-    label: "TOML — Codex CLI",
-    file: "~/.codex/config.toml",
-    code: CODEX_TOML,
-  },
-];
+function variantsFor(cfg: { json: string; toml: string } | null): VariantSection[] {
+  return [
+    {
+      id: "json",
+      label: "JSON — Claude Desktop, Cursor, ZCode / Claude Code",
+      file: "claude_desktop_config.json · ~/.cursor/mcp.json · .mcp.json (project root)",
+      code: cfg?.json ?? json(),
+      note: "Windows Claude Desktop: %APPDATA%\\Claude\\claude_desktop_config.json",
+    },
+    {
+      id: "toml",
+      label: "TOML — Codex CLI",
+      file: "~/.codex/config.toml",
+      code: cfg?.toml ?? CODEX_TOML,
+    },
+  ];
+}
 
 /**
  * Guard against bogus instant-dismissals: some environments deliver a
@@ -67,6 +69,23 @@ export function useGracefulClose(onClose: () => void, isOpen: boolean, graceMs =
 
 export function McpDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const handleOpenChange = useGracefulClose(onClose, isOpen);
+  const [cfg, setCfg] = useState<{ serverPath: string; json: string; toml: string } | null>(null);
+
+  // The app is served by the same Arabian install that ships the MCP server,
+  // so ask it for the real absolute path instead of a placeholder.
+  useEffect(() => {
+    if (!isOpen) return;
+    let alive = true;
+    fetch("/api/mcp-config")
+      .then((r) => r.json())
+      .then((c) => alive && setCfg(c))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [isOpen]);
+
+  const variants = variantsFor(cfg);
   return (
     <Modal.Root isOpen={isOpen} onOpenChange={handleOpenChange}>
       <Modal.Backdrop isDismissable>
@@ -88,7 +107,7 @@ export function McpDialog({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 </p>
 
 
-                {VARIANTS.map((s) => (
+                {variants.map((s) => (
                   <section key={s.id}>
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold text-foreground">{s.label}</h3>

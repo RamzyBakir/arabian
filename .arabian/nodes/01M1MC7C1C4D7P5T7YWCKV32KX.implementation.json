@@ -1,0 +1,15 @@
+{
+  "id": "01M1MC7C1C4D7P5T7YWCKV32KX",
+  "type": "implementation",
+  "title": "feat: pre-launch package — context engine, diff, doctor, link commit, CI, docs",
+  "status": "completed",
+  "createdAt": "2026-09-03T19:34:10.219Z",
+  "updatedAt": "2026-09-03T19:34:10.219Z",
+  "createdBy": {
+    "kind": "agent",
+    "name": "Ramzy"
+  },
+  "metadata": {
+    "commit": "HEAD"
+  }
+}

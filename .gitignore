@@ -3,3 +3,4 @@ dist/
 web/dist/
 *.log
 .arabian/
+scripts/seed.mjs

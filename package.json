@@ -22,6 +22,7 @@
     "build:web": "npm run build -w web",
     "dev:web": "npm run dev -w web",
     "typecheck": "tsc --noEmit",
+    "check:mcp": "node scripts/mcp-check.mjs",
     "seed": "node scripts/seed.mjs"
   },
   "workspaces": [

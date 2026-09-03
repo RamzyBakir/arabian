@@ -138,12 +138,14 @@ export function recentNodes(store: Store, limit = 20): LineageNode[] {
 export function matchNodeId(store: Store, idOrPrefix: string): string {
   if (store.hasNode(idOrPrefix)) return idOrPrefix;
   const nodes = store.listNodes();
-  let matches = nodes.filter((n) => n.id.toLowerCase().startsWith(idOrPrefix.toLowerCase()));
-  if (matches.length === 1) return matches[0]!.id;
+  const prefixMatches = nodes.filter((n) => n.id.toLowerCase().startsWith(idOrPrefix.toLowerCase()));
+  if (prefixMatches.length === 1) return prefixMatches[0]!.id;
+  let matches = prefixMatches;
   const display = /^([0-9A-HJKMNP-TV-Z]{10})([0-9A-HJKMNP-TV-Z]{4})$/.exec(idOrPrefix.toUpperCase());
   if (display) {
-    matches = nodes.filter((n) => n.id.startsWith(display[1]!) && n.id.endsWith(display[2]!));
-    if (matches.length === 1) return matches[0]!.id;
+    const displayMatches = nodes.filter((n) => n.id.startsWith(display[1]!) && n.id.endsWith(display[2]!));
+    if (displayMatches.length === 1) return displayMatches[0]!.id;
+    if (displayMatches.length > 0) matches = displayMatches;
   }
   if (matches.length === 0) {
     throw new StoreError("not_found", `no node matches "${idOrPrefix}"`);

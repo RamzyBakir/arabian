@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK6BR0QZHH34B4MJ2YH",
+  "type": "alternative",
+  "title": "A directed graph of typed nodes",
+  "status": "accepted",
+  "createdAt": "2026-09-02T16:35:32.582Z",
+  "updatedAt": "2026-09-02T16:35:32.582Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "Typed nodes + explicit typed edges. Branches, merges, supersession chains and the outcome→question cycle are all first-class.",
+  "tags": [
+    "data-model"
+  ]
+}

@@ -4,12 +4,44 @@
   "description": "Local-first engineering lineage: capture why your codebase looks the way it does.",
   "type": "module",
   "license": "MIT",
+  "author": {
+    "name": "Ramzy Bakir",
+    "url": "https://github.com/RamzyBakir"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RamzyBakir/arabian.git"
+  },
+  "homepage": "https://github.com/RamzyBakir/arabian#readme",
+  "bugs": {
+    "url": "https://github.com/RamzyBakir/arabian/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "decision-records",
+    "adr",
+    "lineage",
+    "engineering-history",
+    "knowledge-graph",
+    "cli",
+    "ai-agents",
+    "coding-agents",
+    "local-first"
+  ],
   "engines": {
     "node": ">=18"
   },
   "bin": {
     "arabian": "./dist/cli/index.js",
     "arabian-mcp": "./dist/mcp/server.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -22,8 +54,11 @@
     "build:web": "npm run build -w web",
     "dev:web": "npm run dev -w web",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check:mcp": "node scripts/mcp-check.mjs",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "workspaces": [
     "web"
@@ -35,6 +70,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.4"
   }
 }

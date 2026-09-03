@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK4YPDD9HYZ1DCMD0A7",
+  "type": "question",
+  "title": "Where should lineage live on disk?",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.580Z",
+  "updatedAt": "2026-09-02T16:35:32.580Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "The storage must be inspectable by humans, diffable by git, and readable by any agent with filesystem access.",
+  "tags": [
+    "storage"
+  ]
+}

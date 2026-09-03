@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK5VXC51Y063WEGDMF1",
+  "type": "question",
+  "title": "Who is the primary consumer — humans or agents?",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.581Z",
+  "updatedAt": "2026-09-02T16:35:32.581Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "If agents are the primary writers, the tool surface must be MCP-first and the web UI is for exploring what was recorded.",
+  "tags": [
+    "product"
+  ]
+}

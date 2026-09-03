@@ -1,11 +1,20 @@
 ---
 name: arabian
-description: Record and explore engineering lineage with Arabian — the local-first decision graph in .arabian/. Use when the user asks to record a decision, question, alternative, experiment, implementation, outcome, or constraint; capture "why" context about the codebase; link lineage nodes; supersede a decision; or explore/summarize project lineage via the `arabian` CLI or Arabian MCP tools.
+description: Record and explore engineering lineage with Arabian — the local-first decision graph in .arabian/. Use when the user asks to record a decision, question, alternative, experiment, implementation, outcome, or constraint; capture "why" context about the codebase; check what decisions exist for a file before editing it; link lineage nodes; attach a commit to a decision; supersede a decision; or explore/summarize project lineage via the `arabian` CLI or Arabian MCP tools.
 ---
 
 # Arabian: engineering lineage
 
 Arabian is a local-first lineage layer that answers *"why does this codebase look like this, and how did we get here?"*. It stores a directed graph of typed nodes in `.arabian/` (plain JSON, git-friendly). Arabian is a **passive recorder**: you decide what to log, it just stores and connects.
+
+## Consult before you edit
+
+Before modifying a file that might carry recorded decisions, fetch its lineage:
+
+- **MCP:** `arabian_get_context` with `{ "files": ["src/auth/session.ts"] }` (line suffixes ok: `src/x.ts:42-87`)
+- **CLI:** `arabian explain src/auth/session.ts`
+
+It returns the decisions that shape the file, the alternatives they rejected, and related implementations. Follow those constraints; if your change contradicts a recorded decision, surface that to the user instead of silently breaking the decision.
 
 ## When to record
 
@@ -14,7 +23,7 @@ Create nodes proactively (but sparingly — record signal, not noise) when work 
 - A **question** worth answering ("Should we use X or Y?") and its **alternatives**
 - A **decision** and the reasoning/evidence behind it
 - An **experiment** (spike, benchmark) and its **outcome**
-- The **implementation** that landed a decision (PR, module, script)
+- The **implementation** that landed a decision (PR, module, script) — `arabian link commit <decision-id> <sha>` attaches the real commit
 - A hard **constraint** that shaped choices ("must run offline")
 - An **outcome** that raises the next question — wire it with a `triggers` edge; the cycle is the whole point
 
@@ -30,8 +39,12 @@ Do not record routine steps (typical refactors, dependency bumps) unless the use
 
 ```bash
 arabian init                                   # only if .arabian/ doesn't exist
-arabian add <type> "<title>" [-d "markdown"] [--tag a,b] [-f src/x.ts] [--status s] [--actor agent:Codex:claude]
+arabian add <type> "<title>" [-d "markdown"] [--tag a,b] [-f src/x.ts:12-40] [--status s] [--actor agent:Codex:claude]
 arabian link <edge-type> <from-id> <to-id> [--note "..."]
+arabian link commit <node-id> <sha>            # commit as the implementation of a node
+arabian explain <file...>                      # lineage for file(s) — consult before editing
+arabian diff [ref]                             # lineage changes since a git ref (default HEAD)
+arabian doctor [--check-files]                 # integrity check
 arabian list [type] [--status s] [--tag t]     # ids in col 1
 arabian show <id> [--hops n] [--direction up|down|both]
 arabian search "<query>"
@@ -44,9 +57,11 @@ Statuses: `draft proposed accepted rejected superseded abandoned completed` (tra
 
 ## MCP tools (when the arabian MCP server is configured)
 
-`arabian_create_node`, `arabian_update_node`, `arabian_create_edge`, `arabian_get_node`,
-`arabian_list_nodes`, `arabian_get_lineage`, `arabian_search`, `arabian_get_graph`, `arabian_supersede`.
-Prefer these over shelling out to the CLI when available. `arabian_supersede` replaces a decision in
+`arabian_get_context`, `arabian_create_node`, `arabian_update_node`, `arabian_create_edge`,
+`arabian_get_node`, `arabian_list_nodes`, `arabian_get_lineage`, `arabian_search`,
+`arabian_get_graph`, `arabian_supersede`.
+Prefer these over shelling out to the CLI when available. `arabian_get_context` comes first —
+consult files before editing them. `arabian_supersede` replaces a decision in
 one step (new decision + `supersedes` edge + old marked superseded).
 
 ## Edge types — pick by meaning

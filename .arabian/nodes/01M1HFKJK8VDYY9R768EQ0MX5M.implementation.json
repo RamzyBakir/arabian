@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK8VDYY9R768EQ0MX5M",
+  "type": "implementation",
+  "title": "MCP server with 9 agent tools",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.584Z",
+  "updatedAt": "2026-09-02T16:35:32.584Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "stdio server on @modelcontextprotocol/sdk: create/update nodes, create edges, get/list, lineage traversal, search, full graph, and the supersede convenience tool.",
+  "fileRefs": [
+    "src/mcp/server.ts"
+  ]
+}

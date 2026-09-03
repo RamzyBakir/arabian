@@ -1,0 +1,17 @@
+{
+  "id": "01M1HFKJK7SADM265VB263NRP6",
+  "type": "experiment",
+  "title": "Dogfood: record Arabian's own design lineage",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.583Z",
+  "updatedAt": "2026-09-02T16:35:32.583Z",
+  "createdBy": {
+    "kind": "agent",
+    "name": "arabian-seed",
+    "model": "seed-script"
+  },
+  "description": "Before shipping, use Arabian to record Arabian's own decisions. If the model can't represent its own design history convincingly, the model is wrong.",
+  "tags": [
+    "meta"
+  ]
+}

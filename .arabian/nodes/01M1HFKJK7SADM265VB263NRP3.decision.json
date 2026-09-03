@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK7SADM265VB263NRP3",
+  "type": "decision",
+  "title": "Edges are first-class",
+  "status": "accepted",
+  "createdAt": "2026-09-02T16:35:32.583Z",
+  "updatedAt": "2026-09-02T16:35:32.583Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "The `triggers` edge (outcome → question) is the whole point: without explicit typed edges, the lineage cycle is invisible. Ten edge types cover question→decision, decision→alternative, implementation→decision, and the cycle.",
+  "tags": [
+    "data-model"
+  ]
+}

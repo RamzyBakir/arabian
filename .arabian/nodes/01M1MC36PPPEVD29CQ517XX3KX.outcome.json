@@ -1,0 +1,12 @@
+{
+  "id": "01M1MC36PPPEVD29CQ517XX3KX",
+  "type": "outcome",
+  "title": "45 vitest cases + 17 MCP end-to-end checks pass; README, LICENSE, CI, packaging in place",
+  "status": "completed",
+  "createdAt": "2026-09-03T19:31:53.686Z",
+  "updatedAt": "2026-09-03T19:31:53.686Z",
+  "createdBy": {
+    "kind": "agent",
+    "name": "ZCode"
+  }
+}

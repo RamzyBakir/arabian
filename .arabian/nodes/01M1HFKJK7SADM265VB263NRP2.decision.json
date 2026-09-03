@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK7SADM265VB263NRP2",
+  "type": "decision",
+  "title": "No status enforcement in v1",
+  "status": "accepted",
+  "createdAt": "2026-09-02T16:35:32.583Z",
+  "updatedAt": "2026-09-02T16:35:32.583Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "Any status may transition to any other. Validation adds friction without proportional value this early; the schema still constrains what a status *is*.",
+  "tags": [
+    "data-model"
+  ]
+}

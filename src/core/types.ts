@@ -73,6 +73,8 @@ export interface LineageEdge {
 export interface ProjectMeta {
   name: string;
   description?: string;
+  /** Git remote or repo homepage URL — enables GitHub links for file refs. */
+  repository?: string;
   createdAt: string;
 }
 

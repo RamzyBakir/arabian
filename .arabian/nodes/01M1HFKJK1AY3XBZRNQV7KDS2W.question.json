@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK1AY3XBZRNQV7KDS2W",
+  "type": "question",
+  "title": "How should lineage records be structured?",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.577Z",
+  "updatedAt": "2026-09-02T16:35:32.577Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "A lineage can branch (alternatives), merge, and cycle (an outcome raises the next question). Whatever structure we pick has to survive all three.",
+  "tags": [
+    "data-model"
+  ]
+}

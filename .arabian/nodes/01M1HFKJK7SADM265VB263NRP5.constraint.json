@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK7SADM265VB263NRP5",
+  "type": "constraint",
+  "title": "Storage must be git-friendly and zero-dependency",
+  "status": "accepted",
+  "createdAt": "2026-09-02T16:35:32.583Z",
+  "updatedAt": "2026-09-02T16:35:32.583Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "Lineage files live in the repo they describe. They must diff cleanly, review cleanly in PRs, and require nothing beyond Node itself to read.",
+  "tags": [
+    "storage"
+  ]
+}

@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Card, Input, TextArea } from "@heroui/react";
 import type { EdgeType, LineageNode, NodeStatus } from "@core/types";
+import { parseFileRef } from "@core/context";
 import { api, type DecoratedEdge } from "../api";
 import { EmptyState, ErrorState, LoadingOrb, MarkdownView, StatusChip, TagChip, TypeChip, relTime, shortId } from "../components/bits";
 import { ChevronLeftIcon } from "../components/icons";
 import { HeroSelect } from "../components/HeroSelect";
 import { EDGE_LABELS, EDGE_TYPES, NODE_STATUSES, STATUS_STYLES, TYPE_COLORS } from "../theme";
+
+/** GitHub repo base URL from the project's `repository` field (https or ssh). */
+function githubBase(repository: string | null): string | null {
+  if (!repository) return null;
+  const m = /github\.com[/:]([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/.exec(repository);
+  return m ? `https://github.com/${m[1]}/${m[2]}` : null;
+}
 
 export function NodeDetail({
   id,
@@ -18,11 +26,13 @@ export function NodeDetail({
 }) {
   const [data, setData] = useState<{ node: LineageNode; incoming: DecoratedEdge[]; outgoing: DecoratedEdge[] } | null>(null);
   const [allNodes, setAllNodes] = useState<LineageNode[]>([]);
+  const [repository, setRepository] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(() => {
     api.node(id).then(setData).catch((err) => setError((err as Error).message));
     api.nodes().then((r) => setAllNodes(r.nodes)).catch(() => {});
+    api.project().then((p) => setRepository(p.repository ?? null)).catch(() => {});
   }, [id]);
 
   useEffect(reload, [reload]);
@@ -45,11 +55,11 @@ export function NodeDetail({
       </div>
 
       <div className="mt-5 space-y-7">
-        <HeaderBlock node={node} onChanged={reload} />
+        <HeaderBlock node={node} repository={repository} onChanged={reload} />
         <div className="grid gap-7 lg:grid-cols-[1fr_360px]">
           <div className="space-y-7">
             <DescriptionBlock node={node} onChanged={reload} />
-            <FileRefsBlock node={node} onChanged={reload} />
+            <FileRefsBlock node={node} repository={repository} onChanged={reload} />
             <LineageBlock
               node={node}
               incoming={incoming}
@@ -72,9 +82,11 @@ export function NodeDetail({
 
 // ---- header: type, title (editable), meta ----
 
-function HeaderBlock({ node, onChanged }: { node: LineageNode; onChanged: () => void }) {
+function HeaderBlock({ node, repository, onChanged }: { node: LineageNode; repository: string | null; onChanged: () => void }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(node.title);
+  const commit = typeof node.metadata?.commit === "string" ? node.metadata.commit : null;
+  const commitUrl = commit && githubBase(repository) ? `${githubBase(repository)}/commit/${commit}` : null;
 
   async function save() {
     if (title.trim() && title !== node.title) {
@@ -123,6 +135,18 @@ function HeaderBlock({ node, onChanged }: { node: LineageNode; onChanged: () => 
             <p className="mt-2 text-sm text-muted">
               created {relTime(node.createdAt)} by {labelOf(node.createdBy)} · updated {relTime(node.updatedAt)}
             </p>
+            {commit && (
+              <p className="mt-1 font-mono text-xs text-muted">
+                commit{" "}
+                {commitUrl ? (
+                  <a href={commitUrl} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+                    {commit.slice(0, 12)}
+                  </a>
+                ) : (
+                  commit.slice(0, 12)
+                )}
+              </p>
+            )}
           </div>
         </div>
       </Card.Content>
@@ -192,7 +216,38 @@ function DescriptionBlock({ node, onChanged }: { node: LineageNode; onChanged: (
 
 // ---- file refs ----
 
-function FileRefsBlock({ node, onChanged }: { node: LineageNode; onChanged: () => void }) {
+/** A file ref rendered as a GitHub link (with line anchor) when the repo is known. */
+function FileRefLink({ fileRef, repository }: { fileRef: string; repository: string | null }) {
+  const { path, startLine, endLine } = parseFileRef(fileRef);
+  const base = githubBase(repository);
+  if (base) {
+    const anchor =
+      startLine === undefined ? ""
+      : endLine !== undefined && endLine !== startLine ? `#L${startLine}-L${endLine}`
+      : `#L${startLine}`;
+    return (
+      <a
+        href={`${base}/blob/HEAD/${path}${anchor}`}
+        target="_blank"
+        rel="noreferrer"
+        className="block truncate font-mono text-sm text-foreground hover:text-accent hover:underline"
+        title={fileRef}
+      >
+        {fileRef}
+      </a>
+    );
+  }
+  return (
+    <span
+      className="block truncate font-mono text-sm text-foreground"
+      title="Set `repository` in .arabian/project.json to make file links clickable"
+    >
+      {fileRef}
+    </span>
+  );
+}
+
+function FileRefsBlock({ node, repository, onChanged }: { node: LineageNode; repository: string | null; onChanged: () => void }) {
   const [adding, setAdding] = useState(false);
   const [value, setValue] = useState("");
 
@@ -237,8 +292,10 @@ function FileRefsBlock({ node, onChanged }: { node: LineageNode; onChanged: () =
         )}
         <div className="mt-2 space-y-2.5">
           {(node.fileRefs ?? []).map((f) => (
-            <div key={f} className="group flex items-center justify-between rounded-lg border border-border bg-surface-secondary px-4 py-3">
-              <span className="truncate font-mono text-sm text-foreground">{f}</span>
+            <div key={f} className="group flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-secondary px-4 py-3">
+              <div className="min-w-0 flex-1">
+                <FileRefLink fileRef={f} repository={repository} />
+              </div>
               <Button variant="ghost" size="sm" onPress={() => remove(f)} className="hidden group-hover:flex">
                 remove
               </Button>

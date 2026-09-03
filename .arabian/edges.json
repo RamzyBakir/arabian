@@ -1,0 +1,272 @@
+[
+  {
+    "id": "01M1HFKJKAZ4NTW5SBZYADW8ND",
+    "from": "01M1HFKJK1AY3XBZRNQV7KDS2W",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YG",
+    "type": "considers",
+    "createdAt": "2026-09-02T16:35:32.586Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKB7MS5M9S2Z09MH3Y7",
+    "from": "01M1HFKJK1AY3XBZRNQV7KDS2W",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YH",
+    "type": "considers",
+    "createdAt": "2026-09-02T16:35:32.587Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKJQ48KWD6K2JACQQPZ",
+    "from": "01M1HFKJK1AY3XBZRNQV7KDS2W",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YJ",
+    "type": "led_to",
+    "createdAt": "2026-09-02T16:35:32.594Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKJQ48KWD6K2JACQQQZ",
+    "from": "01M1HFKJK6BR0QZHH34B4MJ2YJ",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YH",
+    "type": "chooses",
+    "createdAt": "2026-09-02T16:35:32.594Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKKS163E4YCRXQ7RR8P",
+    "from": "01M1HFKJK6BR0QZHH34B4MJ2YJ",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YG",
+    "type": "rejects",
+    "note": "trees can't express the cycle or supersession chains",
+    "createdAt": "2026-09-02T16:35:32.595Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKM24XAQZCH8ZCXNGMM",
+    "from": "01M1HFKJK4YPDD9HYZ1DCMD0A7",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YK",
+    "type": "led_to",
+    "createdAt": "2026-09-02T16:35:32.596Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKM24XAQZCH8ZCXNGMN",
+    "from": "01M1HFKJK7SADM265VB263NRP5",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YK",
+    "type": "constrains",
+    "note": "sqlite blobs don't diff; JSON does",
+    "createdAt": "2026-09-02T16:35:32.596Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKN1G7X72F83GPMPXVZ",
+    "from": "01M1HFKJK5VXC51Y063WEGDMF0",
+    "to": "01M1HFKJK7SADM265VB263NRP2",
+    "type": "led_to",
+    "createdAt": "2026-09-02T16:35:32.597Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKPVPF85NEDESNRNBEH",
+    "from": "01M1HFKJK5VXC51Y063WEGDMF1",
+    "to": "01M1HFKJK7SADM265VB263NRP4",
+    "type": "led_to",
+    "createdAt": "2026-09-02T16:35:32.598Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKPVPF85NEDESNRNBEJ",
+    "from": "01M1HFKJK7SADM265VB263NRP4",
+    "to": "01M1HFKJK7SADM265VB263NRP3",
+    "type": "references",
+    "note": "agent tools expose edges directly",
+    "createdAt": "2026-09-02T16:35:32.598Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKQRG98BFVE6032R4KQ",
+    "from": "01M1HFKJK8VDYY9R768EQ0MX5K",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YJ",
+    "type": "implements",
+    "createdAt": "2026-09-02T16:35:32.599Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKR4B3S28FQVBF0DRJ3",
+    "from": "01M1HFKJK8VDYY9R768EQ0MX5K",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YK",
+    "type": "implements",
+    "createdAt": "2026-09-02T16:35:32.600Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKSZCBH04Y9E9FRCJM8",
+    "from": "01M1HFKJK8VDYY9R768EQ0MX5K",
+    "to": "01M1HFKJK7SADM265VB263NRP2",
+    "type": "implements",
+    "createdAt": "2026-09-02T16:35:32.601Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKTMVEY2H3NYGPV344F",
+    "from": "01M1HFKJK8VDYY9R768EQ0MX5K",
+    "to": "01M1HFKJK7SADM265VB263NRP3",
+    "type": "implements",
+    "createdAt": "2026-09-02T16:35:32.602Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKVPFWEQYZNX497PPWH",
+    "from": "01M1HFKJK8VDYY9R768EQ0MX5M",
+    "to": "01M1HFKJK7SADM265VB263NRP4",
+    "type": "implements",
+    "createdAt": "2026-09-02T16:35:32.603Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKVPFWEQYZNX497PPWJ",
+    "from": "01M1HFKJK8VDYY9R768EQ0MX5N",
+    "to": "01M1HFKJK6BR0QZHH34B4MJ2YJ",
+    "type": "references",
+    "note": "the graph view is the payoff of graph-over-tree",
+    "createdAt": "2026-09-02T16:35:32.603Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKWWYFVVP10G9JJDE1R",
+    "from": "01M1HFKJK7SADM265VB263NRP6",
+    "to": "01M1HFKJK8VDYY9R768EQ0MX5P",
+    "type": "produces",
+    "createdAt": "2026-09-02T16:35:32.604Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1HFKJKWWYFVVP10G9JJDE1S",
+    "from": "01M1HFKJK8VDYY9R768EQ0MX5P",
+    "to": "01M1HFKJK5VXC51Y063WEGDMF2",
+    "type": "triggers",
+    "note": "if evidence needs re-splitting, the cycle starts again",
+    "createdAt": "2026-09-02T16:35:32.604Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "Ramzy"
+    }
+  },
+  {
+    "id": "01M1MC35J2T6TKC6EYWYHMBDV4",
+    "from": "01M1MC34WFZHXRSY1H2AY58J5W",
+    "to": "01M1MC353064JJSNJ9CNT0KN12",
+    "type": "considers",
+    "createdAt": "2026-09-03T19:31:52.514Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "local"
+    }
+  },
+  {
+    "id": "01M1MC35R4SVHKC91VT76MGNHW",
+    "from": "01M1MC34WFZHXRSY1H2AY58J5W",
+    "to": "01M1MC35AHKGFR1J9SF3CGYD0D",
+    "type": "considers",
+    "createdAt": "2026-09-03T19:31:52.708Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "local"
+    }
+  },
+  {
+    "id": "01M1MC364E517HEDWB1VYWM019",
+    "from": "01M1MC34WFZHXRSY1H2AY58J5W",
+    "to": "01M1MC35Y0J1YPRS4E38DSYPXP",
+    "type": "led_to",
+    "createdAt": "2026-09-03T19:31:53.102Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "local"
+    }
+  },
+  {
+    "id": "01M1MC36AXQ02R6ZE92WQP9JP9",
+    "from": "01M1MC35Y0J1YPRS4E38DSYPXP",
+    "to": "01M1MC35AHKGFR1J9SF3CGYD0D",
+    "type": "chooses",
+    "createdAt": "2026-09-03T19:31:53.309Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "local"
+    }
+  },
+  {
+    "id": "01M1MC36H0QQNN7BJA1KRRGDDB",
+    "from": "01M1MC35Y0J1YPRS4E38DSYPXP",
+    "to": "01M1MC353064JJSNJ9CNT0KN12",
+    "type": "rejects",
+    "note": "the README sells the agent loop, not the docs",
+    "createdAt": "2026-09-03T19:31:53.504Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "local"
+    }
+  },
+  {
+    "id": "01M1MC372Z7W5GDD65GT9AMWGW",
+    "from": "01M1MC36PPPEVD29CQ517XX3KX",
+    "to": "01M1MC36WXFJTXG10JQM4CR8HE",
+    "type": "triggers",
+    "createdAt": "2026-09-03T19:31:54.079Z",
+    "createdBy": {
+      "kind": "human",
+      "name": "local"
+    }
+  }
+]

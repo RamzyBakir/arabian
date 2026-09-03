@@ -1,0 +1,19 @@
+{
+  "id": "01M1HFKJK8VDYY9R768EQ0MX5N",
+  "type": "implementation",
+  "title": "Lineage explorer web UI",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.584Z",
+  "updatedAt": "2026-09-02T16:35:32.584Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "React + Vite + Tailwind v4. Overview with stats and filters, node detail with markdown + lineage panel + supersede, and a React Flow graph with dagre layout, type filters, and focus-dimming.",
+  "fileRefs": [
+    "web/src/App.tsx",
+    "web/src/views/GraphView.tsx",
+    "web/src/views/Overview.tsx",
+    "web/src/views/NodeDetail.tsx"
+  ]
+}

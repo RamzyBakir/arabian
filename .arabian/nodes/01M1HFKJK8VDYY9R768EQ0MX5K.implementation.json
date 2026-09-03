@@ -1,0 +1,19 @@
+{
+  "id": "01M1HFKJK8VDYY9R768EQ0MX5K",
+  "type": "implementation",
+  "title": "Core: store, ULID ids, zod schemas, CLI",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.584Z",
+  "updatedAt": "2026-09-02T16:35:32.584Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "Flat-file store (one `id.type.json` per node, single `edges.json`), monotonic ULIDs, zod-validated writes, and the `arabian` CLI (init/add/link/list/show/search/serve/mcp).",
+  "fileRefs": [
+    "src/core/store.ts",
+    "src/core/ulid.ts",
+    "src/core/schema.ts",
+    "src/cli/index.ts"
+  ]
+}

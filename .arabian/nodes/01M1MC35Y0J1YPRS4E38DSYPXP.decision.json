@@ -1,0 +1,19 @@
+{
+  "id": "01M1MC35Y0J1YPRS4E38DSYPXP",
+  "type": "decision",
+  "title": "Full pre-launch package: get_context, explain, diff, doctor, link commit",
+  "status": "accepted",
+  "createdAt": "2026-09-03T19:31:52.896Z",
+  "updatedAt": "2026-09-03T19:31:52.896Z",
+  "createdBy": {
+    "kind": "agent",
+    "name": "ZCode"
+  },
+  "description": "The context engine is the product thesis — agents should consult lineage before touching code. Ship it with the release, not after it.",
+  "fileRefs": [
+    "src/core/context.ts",
+    "src/core/diff.ts",
+    "src/core/doctor.ts",
+    "src/mcp/server.ts"
+  ]
+}

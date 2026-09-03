@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK6BR0QZHH34B4MJ2YK",
+  "type": "decision",
+  "title": "JSON files over SQLite",
+  "status": "accepted",
+  "createdAt": "2026-09-02T16:35:32.582Z",
+  "updatedAt": "2026-09-02T16:35:32.582Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "Plain JSON in `.arabian/`: git-native, diffable in PRs, zero dependencies, directly readable by agents. Trade-off: no transactions or complex queries — acceptable at v1 scale.",
+  "tags": [
+    "storage"
+  ]
+}

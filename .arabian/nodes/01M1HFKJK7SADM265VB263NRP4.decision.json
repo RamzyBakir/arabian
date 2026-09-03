@@ -1,0 +1,17 @@
+{
+  "id": "01M1HFKJK7SADM265VB263NRP4",
+  "type": "decision",
+  "title": "MCP-first, UI-second",
+  "status": "accepted",
+  "createdAt": "2026-09-02T16:35:32.583Z",
+  "updatedAt": "2026-09-02T16:35:32.583Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "The primary consumer is the coding agent: it records lineage as it works. Nine MCP tools cover CRUD, traversal, search, graph, and supersede. The web UI exists for humans to explore what the agent recorded.",
+  "tags": [
+    "product",
+    "mcp"
+  ]
+}

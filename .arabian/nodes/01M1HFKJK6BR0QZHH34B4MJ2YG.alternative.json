@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK6BR0QZHH34B4MJ2YG",
+  "type": "alternative",
+  "title": "A tree of ADR documents",
+  "status": "rejected",
+  "createdAt": "2026-09-02T16:35:32.582Z",
+  "updatedAt": "2026-09-02T16:35:32.582Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "Classic architecture-decision-records: numbered markdown files, parent/child references. Familiar and simple.",
+  "tags": [
+    "data-model"
+  ]
+}

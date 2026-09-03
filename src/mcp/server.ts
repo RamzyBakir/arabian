@@ -8,6 +8,8 @@ import {
   NODE_TYPES,
   Store,
   StoreError,
+  explainFiles,
+  formatFileContext,
   getLineage,
   getStats,
   matchNodeId,
@@ -15,7 +17,9 @@ import {
   type Actor,
 } from "../core/index.js";
 
-const VERSION = "0.1.0";
+// Injected at build time via tsup `define`; falls back when run unbundled.
+declare const __VERSION__: string;
+const VERSION: string = typeof __VERSION__ !== "undefined" ? __VERSION__ : "0.0.0-dev";
 
 function openStore(): Store {
   const root = process.env.ARABIAN_ROOT ?? process.cwd();
@@ -50,6 +54,34 @@ function toolError(err: unknown) {
 }
 
 const server = new McpServer({ name: "arabian", version: VERSION });
+
+// -- arabian_get_context --
+server.registerTool(
+  "arabian_get_context",
+  {
+    title: "Get engineering context for files",
+    description:
+      "Fetch the recorded engineering lineage for one or more files before touching them: decisions that shape them, the questions behind those decisions, alternatives considered, constraints, implementations and supersedes. Returns readable text. Use this proactively whenever you are about to modify code that might have recorded context.",
+    inputSchema: {
+      files: z
+        .array(z.string().min(1))
+        .min(1)
+        .describe("Repo-relative paths; line suffixes ok (src/auth/session.ts or src/auth/session.ts:42-87)"),
+      limit: z.number().int().min(1).max(20).optional().describe("Max nodes per file, default 8"),
+    },
+  },
+  async ({ files, limit }) => {
+    try {
+      const store = openStore();
+      const contexts = explainFiles(store, files, { limit });
+      return {
+        content: [{ type: "text" as const, text: contexts.map(formatFileContext).join("\n\n") }],
+      };
+    } catch (err) {
+      return toolError(err);
+    }
+  },
+);
 
 // -- arabian_create_node --
 server.registerTool(

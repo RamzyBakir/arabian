@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK6BR0QZHH34B4MJ2YJ",
+  "type": "decision",
+  "title": "Graph over tree",
+  "status": "accepted",
+  "createdAt": "2026-09-02T16:35:32.582Z",
+  "updatedAt": "2026-09-02T16:35:32.582Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "Decisions branch, merge, and cycle. A tree cannot represent an outcome raising the next question, or one decision superseding another while keeping both visible. We chose the directed graph of typed nodes.",
+  "tags": [
+    "data-model"
+  ]
+}

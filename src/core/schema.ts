@@ -44,6 +44,7 @@ export const lineageEdgeSchema = z.object({
 export const projectMetaSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  repository: z.string().min(1).optional(),
   createdAt: z.string().datetime({ offset: true }),
 });
 

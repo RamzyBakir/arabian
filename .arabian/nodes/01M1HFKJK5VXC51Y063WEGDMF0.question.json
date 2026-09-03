@@ -1,0 +1,16 @@
+{
+  "id": "01M1HFKJK5VXC51Y063WEGDMF0",
+  "type": "question",
+  "title": "Should status transitions be enforced?",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.581Z",
+  "updatedAt": "2026-09-02T16:35:32.581Z",
+  "createdBy": {
+    "kind": "human",
+    "name": "Ramzy"
+  },
+  "description": "ADR tools enforce draft → accepted → superseded. Does that friction earn its keep in v1?",
+  "tags": [
+    "data-model"
+  ]
+}

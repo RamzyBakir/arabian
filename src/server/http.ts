@@ -2,13 +2,18 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { ZodType } from "zod";
+import { z } from "zod";
 import {
   Store,
   StoreError,
+  edgeInputSchema,
   getStats,
   matchNodeId,
+  nodeInputSchema,
+  nodePatchSchema,
+  actorSchema,
   searchNodes,
-  type Actor,
   type LineageEdge,
   type NodeType,
 } from "../core/index.js";
@@ -40,9 +45,37 @@ function jsonRes(res: ServerResponse, status: number, data: unknown): void {
   const body = JSON.stringify(data);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
   });
   res.end(body);
+}
+
+/** Validate a request body against a core schema, mapping failures to 400s. */
+function parseWith<T>(schema: ZodType<T>, body: unknown): T {
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const where = issue?.path.length ? issue.path.join(".") : "body";
+    throw new StoreError("invalid", `invalid request: ${where}: ${issue?.message ?? "schema mismatch"}`);
+  }
+  return parsed.data;
+}
+
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+
+const supersedeBodySchema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  note: z.string().optional(),
+  createdBy: actorSchema.optional(),
+});
+
+/** Is the Host header a loopback address on the expected port? */
+function isLoopbackHost(hostHeader: string, port: number): boolean {
+  const bracket = /^\[(.+)\](?::(\d+))?$/.exec(hostHeader);
+  const hostname = bracket ? bracket[1]! : hostHeader.includes(":") ? hostHeader.slice(0, hostHeader.lastIndexOf(":")) : hostHeader;
+  const portPart = bracket ? bracket[2] : hostHeader.includes(":") ? hostHeader.slice(hostHeader.lastIndexOf(":") + 1) : undefined;
+  if (portPart !== undefined && portPart !== "" && portPart !== String(port)) return false;
+  return LOOPBACK_HOSTS.has(hostname);
 }
 
 function errorRes(res: ServerResponse, err: unknown): void {
@@ -91,20 +124,22 @@ function decorateEdges(store: Store, edges: LineageEdge[]): (LineageEdge & { fro
 
 export function serve(store: Store, opts: ServeOptions): void {
   const webDir = resolve(opts.webDir ?? defaultWebDir());
+  // Only enforce loopback Host checks when we're actually bound to loopback —
+  // a user who deliberately serves on 0.0.0.0 opts out of the protection.
+  const boundLoopback = LOOPBACK_HOSTS.has(opts.host.replace(/^\[|\]$/g, ""));
 
   const server = createServer(async (req, res) => {
+    if (boundLoopback) {
+      const host = req.headers.host;
+      if (!host || !isLoopbackHost(host, opts.port)) {
+        res.writeHead(403, { "Content-Type": "text/plain" });
+        res.end("forbidden: arabian only accepts loopback requests");
+        return;
+      }
+    }
+
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
     const path = url.pathname;
-
-    if (req.method === "OPTIONS") {
-      res.writeHead(204, {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      });
-      res.end();
-      return;
-    }
 
     if (path === "/api" || path.startsWith("/api/")) {
       try {
@@ -192,10 +227,13 @@ async function handleApi(
     }
 
     if (method === "POST" && !id) {
-      const body = (await readBody(req)) as Record<string, unknown> | undefined;
+      const body = await readBody(req);
       if (!body) throw new StoreError("invalid", "request body required");
-      const { createdBy, ...input } = body as { createdBy?: Actor } & Record<string, unknown>;
-      const node = store.createNode({ ...input, createdBy } as never);
+      const input = parseWith(nodeInputSchema, body);
+      const node = store.createNode({
+        ...input,
+        createdBy: input.createdBy ?? { kind: "human", name: "local" },
+      });
       return void jsonRes(res, 201, node);
     }
 
@@ -213,21 +251,20 @@ async function handleApi(
 
       if (method === "PATCH" && !action) {
         const body = await readBody(req);
-        return void jsonRes(res, 200, store.updateNode(nodeId, (body ?? {}) as never));
+        return void jsonRes(res, 200, store.updateNode(nodeId, parseWith(nodePatchSchema, body ?? {})));
       }
 
       if (method === "POST" && action === "supersede") {
-        const body = (await readBody(req)) as { title?: string; description?: string; note?: string; createdBy?: Actor };
-        if (!body?.title) throw new StoreError("invalid", "supersede requires a title for the new decision");
+        const parsed = parseWith(supersedeBodySchema, await readBody(req));
         const old = store.getNode(nodeId);
         if (old.type !== ("decision" satisfies NodeType)) {
           throw new StoreError("invalid", "only decisions can be superseded");
         }
-        const by = body.createdBy ?? { kind: "human", name: "local" };
+        const by = parsed.createdBy ?? { kind: "human", name: "local" };
         const newNode = store.createNode({
           type: "decision",
-          title: body.title,
-          description: body.description,
+          title: parsed.title,
+          description: parsed.description,
           status: "accepted",
           fileRefs: old.fileRefs,
           tags: old.tags,
@@ -237,7 +274,7 @@ async function handleApi(
           from: newNode.id,
           to: old.id,
           type: "supersedes",
-          note: body.note,
+          note: parsed.note,
           createdBy: by,
         });
         store.updateNode(old.id, { status: "superseded" });
@@ -256,7 +293,7 @@ async function handleApi(
 
     if (method === "POST" && !id) {
       const body = await readBody(req);
-      const edge = store.createEdge((body ?? {}) as never);
+      const edge = store.createEdge(parseWith(edgeInputSchema, body ?? {}));
       return void jsonRes(res, 201, edge);
     }
 

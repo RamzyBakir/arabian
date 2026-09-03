@@ -5,10 +5,14 @@ import { fileURLToPath } from "node:url";
 import {
   Store,
   StoreError,
+  diffSince,
+  explainFiles,
   findStoreRoot,
   getStats,
+  git,
   initProject,
   matchNodeId,
+  runDoctor,
   searchNodes,
   getLineage,
   NODE_STATUSES,
@@ -64,14 +68,18 @@ const EDGE_HINTS: Record<EdgeType, string> = {
 const USAGE = `arabian — local-first engineering lineage
 
 Usage:
-  arabian init [--name <name>] [--description <text>]     Create .arabian/ in this directory
+  arabian init [--name <name>] [--description <text>] [--repo <url>]   Create .arabian/ in this directory
   arabian add <type> <title> [options]                    Create a node
       -d, --description <text>   Markdown description
       -s, --status <status>      Default depends on type
       -t, --tag <tag>            Repeatable
-      -f, --file <path>          Link a file (repeatable)
+      -f, --file <path>          Link a file (repeatable, "path:12-34" ok)
       --actor <kind:name[:model]>  e.g. human:Ramzy or agent:Codex:gpt-5
   arabian link <edge-type> <from-id> <to-id> [--note <text>] [--actor ...]
+  arabian link commit <node-id> <sha> [--note <text>]     Attach a git commit as the implementation
+  arabian explain <file...>                               Lineage recorded for file(s), e.g. explain src/db/storage.ts:10-40
+  arabian diff [ref]                                      Lineage changes since a git ref (default HEAD)
+  arabian doctor [--check-files]                          Structural integrity check
   arabian list [type] [--status <status>] [--tag <tag>]
   arabian show <id> [--hops <n>] [--direction up|down|both]
   arabian search <query>
@@ -206,11 +214,19 @@ function cmdInit(parsed: Parsed): void {
     fail(new StoreError("already_exists", `.arabian/ already exists (walk up from here); use --force to create a nested one`));
   }
   const name = one(parsed.flags, "name") ?? root.split("/").pop() ?? "project";
+  let repository = one(parsed.flags, "repo");
+  if (!repository) {
+    // Best-effort: pick up the git origin so file links work out of the box.
+    const origin = git(["remote", "get-url", "origin"], root);
+    if (origin) repository = origin;
+  }
   const meta = initProject(root, {
     name,
     description: one(parsed.flags, "description"),
+    ...(repository ? { repository } : {}),
   });
   console.log(c.green(`Initialized Arabian project "${meta.name}" in ${root}/.arabian`));
+  if (meta.repository) console.log(c.dim(`repository: ${meta.repository} (used for file links)`));
 }
 
 function cmdAdd(parsed: Parsed): void {
@@ -238,6 +254,7 @@ function cmdLink(parsed: Parsed): void {
   if (!type || !from || !to) {
     fail(new StoreError("invalid", "usage: arabian link <edge-type> <from-id> <to-id>"));
   }
+  if (type === "commit") return cmdLinkCommit(from, to, parsed);
   if (!EDGE_TYPES.includes(type as EdgeType)) {
     fail(new StoreError("invalid", `unknown edge type "${type}". Types: ${EDGE_TYPES.join(", ")}`));
   }
@@ -250,6 +267,48 @@ function cmdLink(parsed: Parsed): void {
     createdBy: parseActor(one(parsed.flags, "actor")),
   });
   console.log(c.green(`linked ${short(edge.from)} --${edge.type}--> ${short(edge.to)}`));
+}
+
+/**
+ * `arabian link commit <node-id> <sha>` — attach a git commit as the
+ * implementation of a node. Reuses the implementation node already created
+ * for that sha; falls back to the commit subject as the title when git
+ * metadata is unavailable.
+ */
+function cmdLinkCommit(nodeRef: string, sha: string, parsed: Parsed): void {
+  const store = open();
+  const targetId = resolveId(store, nodeRef);
+  const subject = git(["log", "-1", "--format=%s", sha], store.paths.root);
+  if (subject === null) {
+    fail(new StoreError("invalid", `cannot resolve commit "${sha}" in ${store.paths.root}`));
+  }
+  const by = parseActor(one(parsed.flags, "actor")) ?? { kind: "human", name: "local" };
+
+  let impl = store
+    .listNodes()
+    .find((n) => n.type === "implementation" && n.metadata?.commit === sha);
+  if (!impl) {
+    impl = store.createNode({
+      type: "implementation",
+      title: subject.slice(0, 300),
+      status: "completed",
+      metadata: { commit: sha },
+      createdBy: by,
+    });
+  }
+  const already = store
+    .edgesFor(impl.id)
+    .outgoing.some((e) => e.type === "implements" && e.to === targetId);
+  if (!already) {
+    store.createEdge({
+      from: impl.id,
+      to: targetId,
+      type: "implements",
+      note: one(parsed.flags, "note"),
+      createdBy: by,
+    });
+  }
+  console.log(c.green(`${short(impl.id)} "${subject}" implements ${short(targetId)}`));
 }
 
 function cmdList(parsed: Parsed): void {
@@ -285,6 +344,8 @@ function cmdShow(parsed: Parsed): void {
   console.log(`status: ${statusColor(node.status)(node.status)}  created: ${node.createdAt}  by: ${actorLabel(node.createdBy)}`);
   if (node.tags?.length) console.log(`tags: ${node.tags.join(", ")}`);
   if (node.fileRefs?.length) console.log(`files:\n${node.fileRefs.map((f) => `  - ${f}`).join("\n")}`);
+  const commit = typeof node.metadata?.commit === "string" ? node.metadata.commit : undefined;
+  if (commit) console.log(`commit: ${commit}`);
   if (node.description) console.log(`\n${node.description}`);
   if (incoming.length) {
     console.log(c.bold(`\nled to by (${incoming.length}):`));
@@ -324,6 +385,105 @@ function cmdStats(parsed: Parsed): void {
   console.log(`decisions: ${stats.totalDecisions}  open questions: ${stats.openQuestions}  active experiments: ${stats.activeExperiments}`);
   const byType = Object.entries(stats.byType).map(([t, n]) => `${t}: ${n}`).join("  ");
   console.log(c.dim(byType));
+}
+
+function cmdExplain(parsed: Parsed): void {
+  const store = open();
+  const files = parsed.args;
+  if (files.length === 0) {
+    fail(new StoreError("invalid", "usage: arabian explain <file...>  (line suffixes ok: src/x.ts:10-40)"));
+  }
+  let first = true;
+  for (const ctx of explainFiles(store, files)) {
+    if (!first) console.log("");
+    first = false;
+    if (ctx.entries.length === 0) {
+      console.log(c.dim(`no recorded lineage for ${ctx.file}`));
+      continue;
+    }
+    console.log(c.bold(`Relevant engineering context for ${ctx.file}`) + c.dim(`  (${ctx.entries.length} of ${ctx.totalMatches} matches)`));
+    for (const entry of ctx.entries) {
+      const n = entry.node;
+      console.log("");
+      console.log(
+        `${TYPE_COLORS[n.type](c.bold(`[${n.type.toUpperCase()}]`))} ${c.dim(short(n.id))}  ${n.title}  ${statusColor(n.status)(n.status)}`,
+      );
+      if (n.description) {
+        for (const line of n.description.split("\n")) console.log(`  ${line}`);
+      }
+      if (n.fileRefs?.length) console.log(c.dim(`  files: ${n.fileRefs.join(", ")}`));
+      const commit = typeof n.metadata?.commit === "string" ? n.metadata.commit : undefined;
+      if (commit) console.log(c.dim(`  commit: ${commit}`));
+      for (const r of entry.ledToBy) {
+        console.log(`  ${c.dim("led to by")} ${c.cyan(r.type)} ← ${TYPE_COLORS[r.node.type](r.node.type)} ${r.node.title}${r.note ? c.dim(` (${r.note})`) : ""}`);
+      }
+      for (const r of entry.leadsTo) {
+        console.log(`  ${c.dim("leads to")} ${c.cyan(r.type)} → ${TYPE_COLORS[r.node.type](r.node.type)} ${r.node.title}${r.note ? c.dim(` (${r.note})`) : ""}`);
+      }
+      if (entry.considered.length) {
+        console.log(`  ${c.dim("alternatives considered:")} ${entry.considered.map((a) => a.title).join(", ")}`);
+      }
+      if (entry.supersedes) {
+        console.log(`  ${c.dim("supersedes:")} ${c.dim(short(entry.supersedes.id))} ${entry.supersedes.title}`);
+      }
+    }
+  }
+}
+
+function cmdDiff(parsed: Parsed): void {
+  const store = open();
+  const ref = parsed.args[0] ?? "HEAD";
+  const diff = diffSince(store, ref);
+  console.log(c.bold(`Lineage changes since ${ref}`));
+  if (diff.nodes.length === 0 && diff.links.length === 0) {
+    console.log(c.dim("no lineage changes"));
+    return;
+  }
+  for (const d of diff.nodes) {
+    const mark = d.change === "added" ? c.green("+") : d.change === "removed" ? c.red("−") : c.amber("~");
+    let extra = "";
+    if (d.change === "modified" && d.old) {
+      const changes: string[] = [];
+      if (d.old.status !== d.node.status) changes.push(`status: ${d.old.status} → ${d.node.status}`);
+      if (d.old.title !== d.node.title) changes.push(`title: "${d.old.title}" → "${d.node.title}"`);
+      if (changes.length) extra = c.dim(`  ${changes.join(", ")}`);
+    }
+    console.log(`${mark} ${TYPE_COLORS[d.node.type](d.node.type.padEnd(15))} ${c.dim(short(d.node.id))}  ${d.node.title}${extra}`);
+  }
+  for (const l of diff.links) {
+    const mark = l.change === "added" ? c.green("+") : c.red("−");
+    const label = (id: string): string => {
+      try {
+        return `${short(id)} ${store.getNode(id).title}`;
+      } catch {
+        return short(id);
+      }
+    };
+    console.log(`${mark} ${c.cyan("link")} ${l.edge.type}  ${label(l.edge.from)} → ${label(l.edge.to)}`);
+  }
+}
+
+function cmdDoctor(parsed: Parsed): void {
+  const store = open();
+  const report = runDoctor(store, { checkFiles: Boolean(one(parsed.flags, "check-files")) });
+  const ok = report.errors.length === 0;
+  console.log(c.bold("Arabian integrity check"));
+  console.log(`  ${ok ? c.green("✓") : c.red("✗")} ${report.nodeCount} nodes`);
+  console.log(`  ${ok ? c.green("✓") : c.red("✗")} ${report.edgeCount} edges`);
+  for (const issue of [...report.errors, ...report.warnings]) {
+    const mark = issue.severity === "error" ? c.red("✗") : c.amber("!");
+    console.log(`  ${mark} ${issue.message}`);
+  }
+  if (ok) {
+    console.log(
+      report.warnings.length === 0
+        ? c.green("\nLineage is healthy.")
+        : c.amber(`\nLineage is healthy with ${report.warnings.length} warning(s).`),
+    );
+  } else {
+    console.log(c.red(`\nLineage has problems (${report.errors.length} error(s), ${report.warnings.length} warning(s)).`));
+    process.exitCode = 1;
+  }
 }
 
 function cmdMcp(): void {
@@ -375,6 +535,12 @@ export function main(argv: string[] = process.argv.slice(2)): void {
       case "search":
       case "find":
         return cmdSearch(parsed);
+      case "explain":
+        return cmdExplain(parsed);
+      case "diff":
+        return cmdDiff(parsed);
+      case "doctor":
+        return cmdDoctor(parsed);
       case "stats":
         return cmdStats(parsed);
       case "skill":

@@ -84,7 +84,7 @@ function pathsFor(root: string): ProjectPaths {
 /** Create a fresh `.arabian/` project at `root`. Throws if one already exists. */
 export function initProject(
   root: string,
-  meta: { name: string; description?: string },
+  meta: { name: string; description?: string; repository?: string },
 ): ProjectMeta {
   const p = pathsFor(root);
   if (existsSync(p.arabian)) {
@@ -94,9 +94,10 @@ export function initProject(
   const metaJson: ProjectMeta = {
     name: meta.name,
     ...(meta.description ? { description: meta.description } : {}),
+    ...(meta.repository ? { repository: meta.repository } : {}),
     createdAt: nowIso(),
   };
-  projectMetaSchema.parse(metaJson);
+  parseOrThrow(projectMetaSchema, metaJson);
   writeJson(p.projectFile, metaJson);
   writeJson(p.edgesFile, []);
   return metaJson;
@@ -128,7 +129,7 @@ export class Store {
   }
 
   getProject(): ProjectMeta {
-    return projectMetaSchema.parse(readJson(this.paths.projectFile));
+    return parseOrThrow(projectMetaSchema, readJson(this.paths.projectFile));
   }
 
   // ---- nodes ----
@@ -183,7 +184,7 @@ export class Store {
   }
 
   createNode(input: NodeInput, opts: { id?: string; at?: Date } = {}): LineageNode {
-    const data = nodeInputSchema.parse(input);
+    const data = parseOrThrow(nodeInputSchema, input);
     const at = (opts.at ?? new Date()).toISOString();
     const node: LineageNode = {
       id: opts.id ?? ulid(opts.at?.getTime()),
@@ -198,7 +199,7 @@ export class Store {
       ...(data.fileRefs?.length ? { fileRefs: dedupe(data.fileRefs) } : {}),
       ...(data.metadata !== undefined ? { metadata: data.metadata } : {}),
     };
-    lineageNodeSchema.parse(node);
+    parseOrThrow(lineageNodeSchema, node);
     const file = this.nodeFile(node.id, node.type);
     if (existsSync(file)) {
       throw new StoreError("already_exists", `node ${node.id} already exists`);
@@ -208,7 +209,7 @@ export class Store {
   }
 
   updateNode(id: string, patch: NodePatch): LineageNode {
-    const data = nodePatchSchema.parse(patch);
+    const data = parseOrThrow(nodePatchSchema, patch);
     const node = this.getNode(id);
     const next: LineageNode = { ...node };
     if (data.title !== undefined) next.title = data.title;
@@ -230,7 +231,7 @@ export class Store {
       else next.metadata = data.metadata;
     }
     next.updatedAt = nowIso();
-    lineageNodeSchema.parse(next);
+    parseOrThrow(lineageNodeSchema, next);
     const oldFile = this.nodeFile(node.id, node.type);
     const newFile = this.nodeFile(next.id, next.type);
     if (oldFile !== newFile) {
@@ -275,7 +276,7 @@ export class Store {
   }
 
   createEdge(input: EdgeInput): LineageEdge {
-    const data = edgeInputSchema.parse(input);
+    const data = parseOrThrow(edgeInputSchema, input);
     if (data.from === data.to) {
       throw new StoreError("invalid", "edge endpoints must be two different nodes");
     }
@@ -297,7 +298,7 @@ export class Store {
       createdBy: data.createdBy ?? defaultActor(),
       ...(data.note !== undefined ? { note: data.note } : {}),
     };
-    lineageEdgeSchema.parse(edge);
+    parseOrThrow(lineageEdgeSchema, edge);
     edges.push(edge);
     this.saveEdges(edges);
     return edge;
@@ -343,6 +344,15 @@ function readJson(file: string): unknown {
   } catch (err) {
     throw new StoreError("io", `failed to read ${file}: ${(err as Error).message}`);
   }
+}
+
+/** Validate input, surfacing failures as StoreError (not raw ZodError). */
+function parseOrThrow<T>(schema: { safeParse(data: unknown): { success: true; data: T } | { success: false; error: { issues: { message: string }[] } } }, data: unknown): T {
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) {
+    throw new StoreError("invalid", parsed.error.issues[0]?.message ?? "invalid input");
+  }
+  return parsed.data;
 }
 
 function writeJson(file: string, data: unknown): void {

@@ -1,0 +1,14 @@
+{
+  "id": "01M1HFKJK8VDYY9R768EQ0MX5P",
+  "type": "outcome",
+  "title": "v1 lineage loop verified end-to-end",
+  "status": "completed",
+  "createdAt": "2026-09-02T16:35:32.584Z",
+  "updatedAt": "2026-09-02T16:35:32.584Z",
+  "createdBy": {
+    "kind": "agent",
+    "name": "arabian-seed",
+    "model": "seed-script"
+  },
+  "description": "CLI writes valid JSON, MCP tools round-trip over stdio, the graph renders with the triggers-cycle visible, and supersede preserves history. The data model survived dogfooding its own design decisions."
+}

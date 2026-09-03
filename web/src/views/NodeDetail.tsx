@@ -6,7 +6,19 @@ import { api, type DecoratedEdge } from "../api";
 import { EmptyState, ErrorState, LoadingOrb, MarkdownView, StatusChip, TagChip, TypeChip, relTime, shortId } from "../components/bits";
 import { ChevronLeftIcon } from "../components/icons";
 import { HeroSelect } from "../components/HeroSelect";
-import { EDGE_LABELS, EDGE_TYPES, NODE_STATUSES, STATUS_STYLES, TYPE_COLORS } from "../theme";
+import { Orb, type OrbMood } from "../components/Orb";
+import { EDGE_LABELS, EDGE_TYPES, NODE_STATUSES, STATUS_STYLES } from "../theme";
+
+/** Orb expresses the node's type as a mood: ●?● question, ●!● decision, … */
+const MOOD_BY_TYPE: Record<LineageNode["type"], OrbMood> = {
+  question: "question",
+  decision: "decision",
+  outcome: "success",
+  constraint: "warning",
+  experiment: "thinking",
+  implementation: "normal",
+  alternative: "normal",
+};
 
 /** GitHub repo base URL from the project's `repository` field (https or ssh). */
 function githubBase(repository: string | null): string | null {
@@ -100,10 +112,7 @@ function HeaderBlock({ node, repository, onChanged }: { node: LineageNode; repos
     <Card.Root>
       <Card.Content className="p-6">
         <div className="flex items-start gap-4">
-          <span
-            className="mt-1.5 h-4 w-4 shrink-0 rounded-full"
-            style={{ backgroundColor: TYPE_COLORS[node.type].hex, boxShadow: `0 0 14px ${TYPE_COLORS[node.type].hex}66` }}
-          />
+          <Orb size={42} mood={MOOD_BY_TYPE[node.type]} className="mt-0.5 shrink-0" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
               <TypeChip type={node.type} />
@@ -133,7 +142,11 @@ function HeaderBlock({ node, repository, onChanged }: { node: LineageNode; repos
               </h1>
             )}
             <p className="mt-2 text-sm text-muted">
-              created {relTime(node.createdAt)} by {labelOf(node.createdBy)} · updated {relTime(node.updatedAt)}
+              created {relTime(node.createdAt)} by{" "}
+              {node.createdBy.kind === "agent" && (
+                <Orb size={14} mood="agent" className="mx-0.5 inline-block align-[-2px]" />
+              )}
+              {labelOf(node.createdBy)} · updated {relTime(node.updatedAt)}
             </p>
             {commit && (
               <p className="mt-1 font-mono text-xs text-muted">

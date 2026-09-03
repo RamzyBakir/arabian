@@ -89,6 +89,29 @@ project to install a SKILL.md that teaches coding assistants the habit —
 | An MCP tool for coding agents | A project management tool |
 | A visual decision explorer | A chat interface |
 
+## Why "Arabian"?
+
+The Arabian horse is one of the oldest horse breeds in the world — and the
+one whose **lineage is its claim to fame**. For thousands of years its
+pedigree was memorized, recited, and passed down: every horse traceable
+through recorded generations. A tool whose whole job is answering *"where
+did this come from?"* could hardly be called anything else.
+
+### The mascot: Orb
+
+Orb is a glossy sphere with two pill eyes and a small vocabulary of moods —
+you'll spot them across the UI:
+
+| Mood | Face | Shows up as |
+|---|---|---|
+| Normal | ●ᴗ● | the header, empty states |
+| Thinking | ●◡● | loading |
+| Question | ●?● | question nodes |
+| Decision | ●!● | decision nodes |
+| Agent | ●◉● | entries recorded by an agent |
+| Warning | ●△● | errors, constraints |
+| Success | ●⌣● | outcomes |
+
 ## Install
 
 ```bash

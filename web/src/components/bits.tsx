@@ -85,7 +85,7 @@ export function EmptyState({ title, hint, action }: { title: string; hint?: stri
   return (
     <HeroEmptyState className="rounded-2xl border border-dashed border-border px-6 py-16">
       <div className="flex flex-col items-center gap-3 text-center">
-        <Orb size={80} float />
+        <Orb size={80} float mood="normal" />
         <div className="text-base font-medium text-foreground">{title}</div>
         {hint && <div className="max-w-sm text-sm leading-relaxed text-muted">{hint}</div>}
         {action}
@@ -97,7 +97,7 @@ export function EmptyState({ title, hint, action }: { title: string; hint?: stri
 export function LoadingOrb({ label = "Loading lineage…" }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-      <Orb size={60} float />
+      <Orb size={60} float mood="thinking" />
       <div className="flex items-center gap-2 text-sm text-muted">
         <Spinner size="sm" />
         {label}
@@ -108,8 +108,9 @@ export function LoadingOrb({ label = "Loading lineage…" }: { label?: string })
 
 export function ErrorState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
-      {message}
+    <div className="flex items-center gap-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+      <Orb size={22} mood="warning" className="shrink-0" />
+      <span>{message}</span>
     </div>
   );
 }

@@ -278,7 +278,7 @@ export function GraphView({ onOpenNode }: { onOpenNode: (id: string) => void }) 
           <Card.Root variant="secondary" className="pointer-events-auto bg-background/80 backdrop-blur">
             <Card.Content className="px-12 py-10 text-center">
               <div className="flex justify-center">
-                <Orb size={72} float />
+                <Orb size={72} float mood="question" />
               </div>
               <p className="mt-3 text-base font-medium text-foreground">Nothing to trace yet</p>
               <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-muted">

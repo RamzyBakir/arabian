@@ -337,11 +337,3 @@ export async function startMcp(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
-
-// Run when launched directly (`arabian mcp` re-exports this module).
-if (process.argv[1]?.replace(/\.js$/, "").endsWith("mcp/server")) {
-  startMcp().catch((err) => {
-    console.error("arabian-mcp failed to start:", err);
-    process.exit(1);
-  });
-}

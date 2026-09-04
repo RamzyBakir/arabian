@@ -30,7 +30,7 @@ export default [
     define,
   },
   {
-    entry: { "mcp/server": "src/mcp/server.ts" },
+    entry: { "mcp/server": "src/mcp/server.ts", "mcp/main": "src/mcp/main.ts" },
     format: ["esm"],
     target: "node18",
     platform: "node",

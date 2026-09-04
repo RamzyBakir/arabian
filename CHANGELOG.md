@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.1
+
+**Fixed:** the published package was silent no-op — every bin entry
+(`arabian`, `arabian-mcp`) exited without doing anything when run through
+npm's `.bin` shims, because the auto-run guards pattern-matched
+`process.argv[1]` against the source layout, which never matches a symlinked
+invocation. Entry points now compare real paths, and the MCP server has a
+dedicated always-run entry (`dist/mcp/main.js`); `arabian mcp` starts the
+server explicitly. A new `check:pack` script installs the actual npm tarball
+into a temp project and exercises every shim (`--help`, `init`, `add`,
+`arabian-mcp`, `arabian mcp`, `serve`) so this class of bug can't ship again;
+it runs in CI and in `prepublishOnly`.
+
 ## 0.1.0 — first public release
 
 - **Core lineage store** — typed nodes (question, alternative, decision,

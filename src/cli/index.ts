@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -486,9 +486,9 @@ function cmdDoctor(parsed: Parsed): void {
   }
 }
 
-function cmdMcp(): void {
-  // Delegate to the MCP entry so `arabian mcp` and `arabian-mcp` are identical.
-  import("../mcp/server.js");
+function cmdMcp(): Promise<void> {
+  // Explicit start — module-level auto-runs don't survive npm's .bin symlinks.
+  return import("../mcp/server.js").then((m) => m.startMcp());
 }
 
 /**
@@ -554,7 +554,8 @@ export function main(argv: string[] = process.argv.slice(2)): void {
         });
       }
       case "mcp":
-        return cmdMcp();
+        void cmdMcp().catch(fail);
+        return;
       case "help":
       case "--help":
       case "-h":
@@ -570,7 +571,17 @@ export function main(argv: string[] = process.argv.slice(2)): void {
   }
 }
 
-// Only auto-run when executed directly (tests import main).
-if (process.argv[1]?.replace(/\.js$/, "").endsWith("cli/index")) {
+// Auto-run only when executed directly. Compare real paths: npm's .bin
+// shims are symlinks, so pattern-matching argv[1] silently never fires
+// (the "installed arabian does nothing" bug).
+function invokedDirectly(): boolean {
+  try {
+    return process.argv[1] != null && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+}
+
+if (invokedDirectly()) {
   main();
 }

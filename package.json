@@ -1,6 +1,6 @@
 {
   "name": "arabian",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local-first engineering lineage: capture why your codebase looks the way it does.",
   "type": "module",
   "license": "MIT",
@@ -34,7 +34,7 @@
   },
   "bin": {
     "arabian": "./dist/cli/index.js",
-    "arabian-mcp": "./dist/mcp/server.js"
+    "arabian-mcp": "./dist/mcp/main.js"
   },
   "exports": {
     ".": {
@@ -57,8 +57,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:mcp": "node scripts/mcp-check.mjs",
+    "check:pack": "node scripts/pack-check.mjs",
     "seed": "node scripts/seed.mjs",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+    "prepublishOnly": "npm run typecheck && npm test && npm run build && npm run check:pack"
   },
   "workspaces": [
     "web"

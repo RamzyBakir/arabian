@@ -13,7 +13,7 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const SERVER = join(REPO, "dist", "mcp", "server.js");
+const SERVER = join(REPO, "dist", "mcp", "main.js");
 
 let passed = 0;
 let failed = 0;

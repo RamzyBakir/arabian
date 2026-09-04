@@ -4,21 +4,21 @@
   <img src="docs/screenshots/graph.png" alt="Arabian lineage graph" width="100%">
 </p>
 
-**Git tells you what changed. Arabian tells you why.**
+Arabian keeps track of why a codebase ended up the way it did.
 
-Arabian is a local-first **engineering lineage** tool. It records the chain
-`question → alternatives → decision → implementation → outcome` as a directed
-graph of typed nodes — stored as plain JSON in your repo, committed to git,
-and queryable by humans (CLI + web UI) and by coding agents over MCP.
+It stores questions, alternatives, decisions, implementations, and outcomes
+as a small graph in your repository. The data is plain JSON, so it can be
+committed, reviewed in a PR, and read without needing a hosted service.
 
-Six months from now, when `src/db/store.ts` makes you ask *"why on earth is
-it built this way?"*, Arabian answers with the decision, the reasoning, the
-alternatives that lost, and the commit that landed it.
+This is useful when you find yourself looking at something like
+`src/db/store.ts` six months later and wondering why it was built that way.
+Arabian connects the code back to the decision, the reasoning, the alternatives
+that were considered, and the commit that implemented it.
 
-## The 60-second version
+## Quick example
 
 ```bash
-$ arabian init                                  # .arabian/ in your repo — commit it
+$ arabian init                                  # creates .arabian/
 
 $ arabian add question "Postgres or SQLite?"
 01J9XQ8W5N  question   Postgres or SQLite?
@@ -31,11 +31,11 @@ $ arabian add decision "SQLite for v1" -d "Zero ops, single file"
 $ arabian link led_to   01J9XQ8W5N <decision-id>
 $ arabian link chooses  <decision-id> <sqlite-id>
 
-$ arabian link commit <decision-id> HEAD        # decision → code
+$ arabian link commit <decision-id> HEAD
 01J9XQAB12CD "Add SQLite storage layer" implements <decision-id>
 ```
 
-And when you come back to that code later:
+Later, `explain` can show the context for a file:
 
 ```bash
 $ arabian explain src/db/store.ts
@@ -49,9 +49,10 @@ Relevant engineering context for src/db/store.ts
   alternatives considered: Postgres, SQLite
 ```
 
-## Agents ask before they touch code
+## For coding agents
 
-Arabian ships an MCP server. Configure it once:
+Arabian includes an MCP server, so coding agents can query the same history
+before changing a file.
 
 ```json
 {
@@ -61,56 +62,37 @@ Arabian ships an MCP server. Configure it once:
 }
 ```
 
-Then the killer question works:
+An agent can ask for the context around `src/auth/session.ts` and get back
+things such as the relevant decision, rejected alternatives, the files it
+affected, and whether it replaced an older decision.
 
-> **You:** "What should I know before changing `src/auth/session.ts`?"
->
-> **Agent:** calls `arabian_get_context` and answers:
->
-> ```text
-> DECISION — Use Redis for sessions [accepted]
->   Single-node memory is insufficient because...
-> Alternatives considered: In-memory, PostgreSQL
-> Implemented by: src/auth/session.ts, src/auth/middleware.ts
-> Supersedes: In-memory sessions
-> ```
+Run `arabian skill` in a project to install a `SKILL.md` that tells coding
+assistants to check the context before editing and record important decisions
+afterwards.
 
-That's the product: not an agent-accessible graph, but something an agent
-actually *wants to consult* before touching code. Run `arabian skill` in any
-project to install a SKILL.md that teaches coding assistants the habit —
-*check context before editing, record decisions after*.
+Arabian does not decide what should be recorded. The agent or the developer
+does that; Arabian just stores and connects it.
 
-## What it is / what it is NOT
+## What Arabian is for
 
-| It IS | It is NOT |
-|---|---|
-| A development lineage graph | An ADR manager |
-| A decision-to-code audit trail | An AI memory vector DB |
-| An MCP tool for coding agents | A project management tool |
-| A visual decision explorer | A chat interface |
+- A development lineage graph
+- A decision-to-code audit trail
+- An MCP server for coding agents
+- A web UI for browsing decisions and their relationships
 
-## Why "Arabian"?
+It is not intended to be an ADR manager, project management tool, chat
+interface, or AI memory/vector database.
 
-The Arabian horse is one of the oldest horse breeds in the world — and the
-one whose **lineage is its claim to fame**. For thousands of years its
-pedigree was memorized, recited, and passed down: every horse traceable
-through recorded generations. A tool whose whole job is answering *"where
-did this come from?"* could hardly be called anything else.
+## Why the name?
 
-### The mascot: Orb
+The Arabian horse is known for its lineage. Its pedigree has been preserved and
+passed down for generations, with each horse traceable to where it came from.
+That felt like a good fit for a tool that answers: “Where did this come from?”
 
-Orb is a glossy sphere with two pill eyes and a small vocabulary of moods —
-you'll spot them across the UI:
+### Orb
 
-| Mood | Face | Shows up as |
-|---|---|---|
-| Normal | ●ᴗ● | the header, empty states |
-| Thinking | ●◡● | loading |
-| Question | ●?● | question nodes |
-| Decision | ●!● | decision nodes |
-| Agent | ●◉● | entries recorded by an agent |
-| Warning | ●△● | errors, constraints |
-| Success | ●⌣● | outcomes |
+Orb is the small mascot used throughout the UI. The different faces correspond
+to normal, thinking, question, decision, agent, warning, and success states.
 
 ## Install
 
@@ -118,44 +100,49 @@ you'll spot them across the UI:
 npm install -g arabian     # node >= 18
 ```
 
-Or run from source: `git clone … && npm install && npm run build`, then use
-`node dist/cli/index.js` (or `npm link`).
+Or run it from source:
+
+```bash
+git clone https://github.com/RamzyBakir/arabian.git
+cd arabian
+npm install
+npm run build
+```
+
+You can then use `node dist/cli/index.js`, or run `npm link` to use the
+`arabian` command directly.
 
 ## CLI
 
 | Command | Purpose |
 |---|---|
-| `arabian init [--repo <url>]` | Create `.arabian/` (auto-detects the git origin for file links) |
+| `arabian init [--repo <url>]` | Create `.arabian/` and detect the git origin for file links |
 | `arabian add <type> <title> [-d] [-f file:12-34] [-t tag] [--actor]` | Create a node |
 | `arabian link <edge-type> <from> <to>` | Connect two nodes |
-| `arabian link commit <node> <sha>` | Attach a git commit as the implementation of a node |
-| `arabian explain <file...>` | Lineage recorded for file(s) — the CLI twin of `get_context` |
-| `arabian diff [ref]` | Lineage changes since a git ref (default `HEAD`) |
-| `arabian doctor [--check-files]` | Structural integrity check (dangling edges, bad JSON, …) |
-| `arabian list / show / search / stats` | Browse |
-| `arabian serve [--port 7424]` | Web UI + JSON API |
-| `arabian skill` | Install the agent SKILL.md into this project |
-| `arabian mcp` | Start the MCP server (stdio) |
+| `arabian link commit <node> <sha>` | Attach a git commit to a node |
+| `arabian explain <file...>` | Show lineage recorded for one or more files |
+| `arabian diff [ref]` | Show lineage changes since a git ref, defaulting to `HEAD` |
+| `arabian doctor [--check-files]` | Check for broken JSON, dangling edges, and other problems |
+| `arabian list / show / search / stats` | Browse the stored lineage |
+| `arabian serve [--port 7424]` | Start the web UI and JSON API |
+| `arabian skill` | Install the agent `SKILL.md` into the current project |
+| `arabian mcp` | Start the MCP server over stdio |
 
 ## MCP tools
 
 `arabian_get_context` (files → relevant lineage), `arabian_create_node`,
 `arabian_update_node`, `arabian_create_edge`, `arabian_get_node`,
 `arabian_list_nodes`, `arabian_get_lineage`, `arabian_search`,
-`arabian_get_graph`, `arabian_supersede`.
-
-**Design rule:** the MCP server never decides what to log — the agent (or
-human) does. Arabian is a passive recorder.
+`arabian_get_graph`, and `arabian_supersede`.
 
 ## Web UI
 
-`arabian serve` → `http://127.0.0.1:7424`
+Run `arabian serve` and open `http://127.0.0.1:7424`.
 
-- **Overview** — stats, searchable/filterable node list, recent activity
-- **Node detail** — markdown descriptions, status, tags, editable lineage, supersede flow
-- **Lineage graph** — React Flow, color-coded by type, typed edges, auto-layout
-- **Clickable file references** — `src/auth/session.ts:42-87` opens the exact
-  spot on GitHub when the project's `repository` is known
+- Overview with stats, search, filters, and recent activity
+- Node details with markdown descriptions, status, tags, and editable lineage
+- A React Flow graph with typed edges and automatic layout
+- Clickable file references such as `src/auth/session.ts:42-87` when a GitHub repository is configured
 
 <p align="center">
   <img src="docs/screenshots/overview.png" alt="Arabian overview" width="100%">
@@ -171,35 +158,36 @@ human) does. Arabian is a passive recorder.
   edges.json          # all edges in one array
 ```
 
-Plain JSON, one file per node: git-diffable and reviewable in PRs, zero
-dependencies, directly readable by agents and humans. IDs are ULIDs
-(sortable, collision-free). Validation is Zod-based on every write; the
-`triggers` edge (outcome → question) closes the lineage cycle and keeps the
-graph growing organically.
+The files are plain JSON and are meant to live in git. Each node gets its own
+file, which keeps diffs readable. IDs are ULIDs, and writes are validated with
+Zod. The `triggers` edge connects an outcome back to a question and lets the
+lineage continue over time.
 
 ### Domain model
 
 **Node types:** `question` `alternative` `decision` `experiment`
 `implementation` `outcome` `constraint`
+
 **Statuses:** `draft` `proposed` `accepted` `rejected` `superseded`
 `abandoned` `completed` (transitions are recorded, not enforced)
+
 **Edge types:** `led_to` `considers` `chooses` `rejects` `supersedes`
 `implements` `produces` `constrains` `triggers` `references`
 
-## Dogfood
+## Dogfooding
 
-This repo tracks its own design lineage in `.arabian/` — run
-`arabian serve` right here to browse the decisions behind Arabian itself.
-`scripts/seed.mjs` (`npm run seed`) generates a fresh example lineage if you
-want to see the machinery work from scratch.
+This repository has its own `.arabian/` directory. Run `arabian serve` here
+to browse the decisions behind Arabian itself.
+
+To generate a fresh example lineage, run `npm run seed`.
 
 ## Development
 
 ```bash
 npm install
-npm run build        # core + CLI + MCP (tsup), web UI (vite)
+npm run build        # core + CLI + MCP, then the web UI
 npm test             # vitest
-npm run check:mcp    # end-to-end MCP verification against the built server
+npm run check:mcp    # end-to-end MCP check against the built server
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md).

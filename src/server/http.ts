@@ -194,7 +194,7 @@ async function handleApi(
 
   // GET /api/mcp-config — ready-to-paste MCP configs with the real server path
   if (method === "GET" && path === "/api/mcp-config") {
-    const serverPath = fileURLToPath(new URL("../mcp/server.js", import.meta.url));
+    const serverPath = fileURLToPath(new URL("../mcp/main.js", import.meta.url));
     return void jsonRes(res, 200, {
       serverPath,
       json: JSON.stringify(
